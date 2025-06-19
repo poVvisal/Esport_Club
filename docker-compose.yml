@@ -1,28 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database Service for Local Dev
-  mongodb:
-    image: mongo:7.0
-    container_name: mongodb-local
-    hostname: mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
-    volumes:
-      - mongo-data-local:/data/db
-    networks:
-      - esports-net-local
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-
   # API Gateway Microservice
   api-gateway:
     build:
@@ -32,21 +10,24 @@ services:
     hostname: api-gateway
     restart: always
     ports:
-      - "4000:4000"
+      - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     environment:
-      - PORT=4000
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=development
+      - PORT=${API_GATEWAY_PORT}
+      - NODE_ENV=${NODE_ENV}
+      - REGISTRATION_SERVICE_URL=${REGISTRATION_SERVICE_URL}
+      - COACH_SERVICE_URL=${COACH_SERVICE_URL}
+      - PLAYER_SERVICE_URL=${PLAYER_SERVICE_URL}
     networks:
       - esports-net-local
     depends_on:
-      - registration
-      - coach
-      - player
+      - registration-service
+      - coach-service
+      - player-service
 
   # Registration Microservice
-  registration:
+  registration-service:
     build:
       context: ./Registration_Microservice
       dockerfile: Dockerfile
@@ -54,19 +35,17 @@ services:
     hostname: registration
     restart: always
     ports:
-      - "5001:5001"
+      - "${REGISTRATION_SERVICE_PORT}:${REGISTRATION_SERVICE_PORT}"
     environment:
-      - PORT=5001
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=development
+      - PORT=${REGISTRATION_SERVICE_PORT}
+      - NODE_ENV=${NODE_ENV}
     networks:
       - esports-net-local
-    depends_on:
-      - mongodb
 
   # Coach Microservice
-  coach:
+  coach-service:
     build:
       context: ./Coach_Microservice
       dockerfile: Dockerfile
@@ -74,19 +53,17 @@ services:
     hostname: coach
     restart: always
     ports:
-      - "5002:5002"
+      - "${COACH_SERVICE_PORT}:${COACH_SERVICE_PORT}"
     environment:
-      - PORT=5002
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=development
+      - PORT=${COACH_SERVICE_PORT}
+      - NODE_ENV=${NODE_ENV}
     networks:
       - esports-net-local
-    depends_on:
-      - mongodb
 
   # Player Microservice
-  player:
+  player-service:
     build:
       context: ./Player_Microservice
       dockerfile: Dockerfile
@@ -94,20 +71,14 @@ services:
     hostname: player
     restart: always
     ports:
-      - "5003:5003"
+      - "${PLAYER_SERVICE_PORT}:${PLAYER_SERVICE_PORT}"
     environment:
-      - PORT=5003
       - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=development
+      - PORT=${PLAYER_SERVICE_PORT}
+      - NODE_ENV=${NODE_ENV}
     networks:
       - esports-net-local
-    depends_on:
-      - mongodb
-
-volumes:
-  mongo-data-local:
-    driver: local
 
 networks:
   esports-net-local:
