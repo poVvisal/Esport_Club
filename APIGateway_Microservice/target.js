@@ -1,6 +1,5 @@
 module.exports = {
-    REGISTRATION_SERVICE: 'http://localhost:5001',
-    AUTHENTICATION_SERVICE: 'http://localhost:5002',
-    COACH_SERVICE: 'http://localhost:5003',
-    PLAYER_SERVICE: 'http://localhost:5004'
+    REGISTRATION_SERVICE: 'http://registration:5001',
+    COACH_SERVICE: 'http://coach:5002', 
+    PLAYER_SERVICE: 'http://player:5003'
 };

@@ -1,0 +1,23 @@
+# .dockerignore
+# This file prevents certain files and directories from being copied
+# into the Docker image, keeping it small and secure.
+
+# Node.js
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Environment files (should never be in the image)
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+
+# OS-specific
+.DS_Store
+Thumbs.db
